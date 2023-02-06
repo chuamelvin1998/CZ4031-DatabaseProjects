@@ -65,15 +65,15 @@ class DiskStorage
     }
 }
 
-class Program
-{
-    static void Main(string[] args)
-    {
-        DiskStorage disk = new DiskStorage();
-        disk.LoadFile("data.tsv");
+// class Program2
+// {
+//     static void Main(string[] args)
+//     {
+//         DiskStorage disk = new DiskStorage();
+//         disk.LoadFile("data.tsv");
 
-        // TESTING: read any block you want
-        byte[] data = disk.ReadBlock(91269);
-        Console.WriteLine("Read result: {0}", System.Text.Encoding.UTF8.GetString(data));
-    }
-}
+//         // TESTING: read any block you want
+//         byte[] data = disk.ReadBlock(91269);
+//         Console.WriteLine("Read result: {0}", System.Text.Encoding.UTF8.GetString(data));
+//     }
+// }
