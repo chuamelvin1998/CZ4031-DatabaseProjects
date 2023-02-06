@@ -9,7 +9,7 @@ class Program2
 
         Disk disk = new Disk();
         Block newBlock = new Block( blockCounter);
-        
+        DataExplore dataExplore = new DataExplore();
 
         foreach (string line in System.IO.File.ReadLines("data.tsv")){  
             string[] subs = line.Split('	');
@@ -42,6 +42,8 @@ class Program2
             //   Console.WriteLine(sizeof(char) * 9 + sizeof(double) + 2*sizeof(int));
             lineCounter++;  
         }  
+        //Data exploration
+        dataExplore.read();
 
         //testing
         Block testBlock = disk.getBlocks()[178385];
