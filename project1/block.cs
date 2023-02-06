@@ -49,10 +49,12 @@ public struct Block{
 	}
 
     public void printRecords()
-        {
+        {   
+            int counter = 1;
             foreach (var record in records) 
             {
-                Console.WriteLine(new string(record.getTConst()) + "\t" + record.getAverageRating() + "\t" + record.getNumVotes() + "\t\t" + record.getRecordID());
+                Console.WriteLine(blockID.ToString()+ "." + counter.ToString() + "\t" + new string(record.getTConst()) + "\t" + record.getAverageRating() + "\t" + record.getNumVotes() + "\t\t" + record.getRecordID());
+                counter++;
             }
         }
 
