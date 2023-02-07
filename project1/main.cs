@@ -38,8 +38,8 @@ class Program2
                 newBlock = new Block(blockCounter);
             }
            
-            // each record is 34bytes, each block is 200/34 = 5.8, 5records each
-            //   Console.WriteLine(sizeof(char) * 9 + sizeof(double) + 2*sizeof(int));
+            // each record is 36bytes, each block is 200/34 = 5.5, 5records each
+            //   Console.WriteLine(sizeof(char) * 10 + sizeof(double) + 2*sizeof(int));
             lineCounter++;  
         }  
         //Data exploration
