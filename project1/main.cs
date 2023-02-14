@@ -36,6 +36,7 @@ class Program2
                 disk.addNewBlock(newBlock);
                 blockCounter++;
                 newBlock = new Block(blockCounter);
+                newBlock.addNewRecord(newRecord);
             }
            
             // each record is 36bytes, each block is 200/34 = 5.5, 5records each
