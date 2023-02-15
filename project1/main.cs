@@ -3,6 +3,8 @@ class Program2
 {
     static void Main(string[] args)
     {
+        const int HEADER_ROWS = 1;
+
         int blockCounter = 1;
         int lineCounter = 0;
 
@@ -17,10 +19,6 @@ class Program2
             if(lineCounter == 0){
                 lineCounter++;
                 continue;
-            }
-
-            if(lineCounter == 1070318){
-                disk.addNewBlock(newBlock);
             }
 
             Record newRecord = new Record();
@@ -42,21 +40,61 @@ class Program2
             // each record is 36bytes, each block is 200/34 = 5.5, 5records each
             //   Console.WriteLine(sizeof(char) * 10 + sizeof(double) + 2*sizeof(int));
             lineCounter++;  
-        }  
+        }
+
+        // if there are any records left in the last block, add it to the disk
+        if(newBlock.getRecords().Count > 0 & newBlock.getRecords().Count < 5){
+            newBlock.setBlockSize();
+            disk.addNewBlock(newBlock);
+            blockCounter++;
+        }
+
         //Data exploration
         dataExplore.read();
 
         //testing
-        Block testBlock = disk.getBlocks()[178385];
+        Block testBlock = disk.getBlocks()[^3];
         testBlock.printRecords();
-        Block testBlock1 = disk.getBlocks()[178386];
+        Block testBlock1 = disk.getBlocks()[^2];
         testBlock1.printRecords();
+        Block testBlock2 = disk.getBlocks()[^1];
+        testBlock2.printRecords();
 
-        //experiment 1
+        //experiment 1 - storage
+        Console.WriteLine("\nRunning Experiment 1...");
         Console.WriteLine("total Blocks: " + disk.getNumberOfBlocks());
-        Console.WriteLine("total Records: " + lineCounter);
+        Console.WriteLine("total Records: " + (lineCounter - HEADER_ROWS));
         Console.WriteLine("size of each Record: " + (sizeof(char) * 9 + sizeof(double) + 2*sizeof(int)).ToString());
         Console.WriteLine("Number of Records in each block: " + (200/(sizeof(char) * 9 + sizeof(double) + 2*sizeof(int))).ToString());
+        Console.WriteLine("Finished Experiment 1...\n");
+
+        //experiment 2 - B+ tree
+        Console.WriteLine("Running Experiment 2...");
+        BPlusTree bPlusTree = new BPlusTree();
+        for (int i = 16; i >= 1; i--)
+        {
+            bPlusTree.Insert(i);
+            
+        }
+        bPlusTree.PrintLayerByLayer();
+
+        BPlusTree bPlusTree2 = new BPlusTree();
+        for (int i = 1; i <= 25; i++)
+        {
+            bPlusTree2.Insert(i);
+        }
+        bPlusTree2.PrintLayerByLayer();
+
+        BPlusTree bPlusTree3 = new BPlusTree();
+        for (int i = 1; i <= 15; i++)
+        {
+            //random number
+            bPlusTree3.Insert(new Random().Next(1, 100));
+        }
+        bPlusTree3.PrintLayerByLayer();
+
+        Console.WriteLine("Finished Experiment 2...\n");
+        
 
     }
 }
