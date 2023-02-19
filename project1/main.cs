@@ -71,27 +71,30 @@ class Program2
         //experiment 2 - B+ tree
         Console.WriteLine("Running Experiment 2...");
         BPlusTree bPlusTree = new BPlusTree();
-        for (int i = 16; i >= 1; i--)
-        {
-            bPlusTree.Insert(i);
-            
+        // // for each item in the disk on the attribute numVotes, add it to the B+ tree until 26
+        // int counter = 0;
+        // foreach(Block block in disk.getBlocks()){
+        //     foreach(Record record in block.getRecords()){
+        //         if(counter < 26){
+        //             Console.WriteLine("Inserting: " + record.getNumVotes());
+        //             bPlusTree.Insert(record.getNumVotes());
+        //             counter++;
+        //         }else{
+        //             break;
+        //         }
+        //     }
+        // }
+
+        // random number 100 times
+        Random random = new Random();
+        for(int i = 0; i < 50; i++){
+            int randomNumber = random.Next(1, 100);
+            Console.WriteLine("Inserting: " + randomNumber);
+            bPlusTree.Insert(randomNumber);
         }
+        
+
         bPlusTree.PrintLayerByLayer();
-
-        BPlusTree bPlusTree2 = new BPlusTree();
-        for (int i = 1; i <= 25; i++)
-        {
-            bPlusTree2.Insert(i);
-        }
-        bPlusTree2.PrintLayerByLayer();
-
-        BPlusTree bPlusTree3 = new BPlusTree();
-        for (int i = 1; i <= 15; i++)
-        {
-            //random number
-            bPlusTree3.Insert(new Random().Next(1, 100));
-        }
-        bPlusTree3.PrintLayerByLayer();
 
         Console.WriteLine("Finished Experiment 2...\n");
         

@@ -35,30 +35,20 @@ class BPlusTree
             return node;
         }
 
-        // Find the correct child node to insert the key
+        // If not non leaf node, find the child node to insert the key
         int i = 0;
         while (i < node.Keys.Count && key > node.Keys[i])
         {
             i++;
         }
 
-
         Node child = node.Children[i];
         Node newChild = Insert(child, key);
-        if (newChild == _root ) return _root;
-        if (newChild != child)
+        if (newChild != child) // if not inserted into direct child
         {
-            node.Children[i] = newChild;
-
-            node.Keys.Insert(i, newChild.Keys[0]);
 
             if (node.Keys.Count > MAX_KEYS)
             {   
-                Console.WriteLine("probably something wrong here");
-                for (int k = 0; k < node.Keys.Count; k++)
-                {
-                    Console.Write(node.Keys[k] + " ");
-                }
                 return SplitNonLeafNode(node);
             }
         }
@@ -67,7 +57,11 @@ class BPlusTree
 
     private Node SplitLeafNode(Node node)
     {   
-        Console.WriteLine();
+        Console.WriteLine("Splitting leaf node");
+        for (int k = 0; k < node.Keys.Count; k++)
+        {
+            Console.Write(node.Keys[k] + " ");
+        }
         int splitIndex = (int)Math.Ceiling(node.Keys.Count / 2.0);
         var left = new Node();
         left.Keys = node.Keys.GetRange(0, splitIndex);
@@ -120,7 +114,8 @@ class BPlusTree
     right.Children = node.Children.GetRange(splitIndex, node.Children.Count - splitIndex);
 
     // Set the pointers to the new nodes
-    if (node == _root)
+    // if node is root or findparent is null
+    if (node == _root || FindParent(_root, node) == null)
     {   
         _root = new Node();
         _root.Keys.Add(node.Keys[splitIndex]);
