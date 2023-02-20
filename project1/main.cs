@@ -1,4 +1,6 @@
 
+using System.Diagnostics;
+
 class Program2
 {
     static void Main(string[] args)
@@ -70,6 +72,9 @@ class Program2
 
         //experiment 2 - B+ tree
         Console.WriteLine("Running Experiment 2...");
+        //measure time
+        Stopwatch stopwatch = new Stopwatch();
+        stopwatch.Start();
         BPlusTree bPlusTree = new BPlusTree();
 
         foreach(Block block in disk.getBlocks()){
@@ -82,6 +87,8 @@ class Program2
         bPlusTree.PrintNumberOfLevels();
         bPlusTree.PrintRootNode();
         // bPlusTree.PrintLayerByLayer();
+        stopwatch.Stop();
+        Console.WriteLine("Time elapsed: {0}", stopwatch.Elapsed);
 
         Console.WriteLine("Finished Experiment 2...\n");
         
