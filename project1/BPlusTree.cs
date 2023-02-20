@@ -2,7 +2,7 @@ class BPlusTree
 {
     private Node _root;
 
-    private const int MAX_KEYS = 50;
+    private const int MAX_KEYS = 25;
 
     public BPlusTree()
     {
