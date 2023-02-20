@@ -94,15 +94,12 @@ class Program2
 
         //experiment 3 - Searching
         Console.WriteLine("Running Experiment 3...");
-
-        // bPlusTree.PrintLayerByLayer();
         bPlusTree.Query(500);
-        bPlusTree.Query(30000,40000);
-
         Console.WriteLine("Finished Experiment 3...\n");
 
-
-        
-
+        //experiment 4 - Ranged Searching
+        Console.WriteLine("Running Experiment 4...");
+        bPlusTree.Query(30000,40000);
+        Console.WriteLine("Finished Experiment 4...\n");
     }
 }
