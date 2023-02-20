@@ -16,7 +16,7 @@ class BPlusTree
     }
 
     private Node Insert(Node node, Record record)
-    {   
+    {
         // Select index
         int key = record.getNumVotes();
 
@@ -29,13 +29,16 @@ class BPlusTree
             {
                 j++;
             }
+
             // if existing key, add record to list
             if (j < node.Keys.Count && key == node.Keys[j])
             {
                 node.Records[j].Add(record);
                 return node;
-            } else {
-                node.Keys.Insert(j, key);
+            }
+            else
+            {
+                node.Keys.Insert (j, key);
                 node.Records.Insert(j, new List<Record>());
                 node.Records[j].Add(record);
             }
@@ -81,7 +84,8 @@ class BPlusTree
 
         left.IsLeaf = right.IsLeaf = true;
         left.Records = node.Records.GetRange(0, splitIndex);
-        right.Records = node.Records.GetRange(splitIndex, node.Records.Count - splitIndex);
+        right.Records =
+            node.Records.GetRange(splitIndex, node.Records.Count - splitIndex);
 
         left.next = right;
 
@@ -357,77 +361,108 @@ class BPlusTree
 
     public void Query(int key)
     {
-        Query(key, key);
+        Query (key, key);
     }
 
     // write a query function that takes a key and returns all nodes that contains the key
     public void Query(int start, int end)
-    {   
-        Console.WriteLine("Querying for keys between " + start + " and " + end + "...");
+    {
+        Console
+            .WriteLine("Querying for keys between " +
+            start +
+            " and " +
+            end +
+            "...");
         if (_root == null)
         {
             Console.WriteLine("Tree is empty.");
             return;
         }
 
-        Queue<Node> queue = new Queue<Node>();
-        queue.Enqueue (_root);
-
-        int counter = 0;
-        int accessedNodes = 0;
-
-        //list of Node results
-        List<Record> results = new List<Record>();
-
-        while (queue.Count > 0)
+        //find the maximum key that is less than or equal to the start key
+        int accessedNodes = 1;
+        Node node = _root;
+        while (!node.IsLeaf)
         {
-            int levelSize = queue.Count;
+            accessedNodes++;
 
-            for (int i = 0; i < levelSize; i++)
+            //print node
+            Console.Write("Accessing node: { ");
+            for (int i = 0; i < node.Keys.Count; i++)
             {
-                Node node = queue.Dequeue();
-                accessedNodes++;
-
-                if (node.Keys.Contains(start) && node.IsLeaf)
-                {   
-                    int index = node.Keys.IndexOf(start);
-
-                    // loop through subsequent keys throughout subsequent leaf nodes, until end is found
-                    while ( node != null && node.Keys[index] >= start && node.Keys[index] <= end )
-                    {   
-                        List<Record> recordList = node.Records[index];
-                        for (int j = 0; j < recordList.Count; j++)
-                        {
-                            results.Add(recordList[j]);
-                            counter++;
-                            // Console.WriteLine(new string(recordList[j].getTConst()) + "\t" + recordList[j].getAverageRating() + "\t" + recordList[j].getNumVotes() + "\t\t" + recordList[j].getRecordID());
-                        }
-                        index++;
-                        if (index >= node.Keys.Count)
-                        {
-                            Node tmp = node;
-                            node = node.next;
-                            index = 0;
-                        }
-                    }
-                    Console.WriteLine("Total records found: " + counter);
-                    Console.WriteLine("Total nodes accessed: " + accessedNodes);
-                    return;
-                    
-                }
-
-                if (!node.IsLeaf)
+                Console.Write(node.Keys[i] + " ");
+            }
+            Console.WriteLine("}");
+            for (int i = 0; i < node.Keys.Count; i++)
+            {
+                if (node.Keys[i] > start)
                 {
-                    for (int j = 0; j < node.Children.Count; j++)
-                    {
-                        queue.Enqueue(node.Children[j]);
-                    }
+                    node = node.Children[i];
+                    break;
+                }
+                if (i == node.Keys.Count - 1)
+                {
+                    node = node.Children[i + 1];
+                    break;
                 }
             }
         }
 
-        Console.WriteLine("Total records found: " + counter);
+        //print node
+        Console.Write("Accessing node: { ");
+        for (int i = 0; i < node.Keys.Count; i++)
+        {
+            Console.Write(node.Keys[i] + " ");
+        }
+        Console.WriteLine("}");
+
+        int counter = 0;
+
+        //list of Node results
+        List<Record> results = new List<Record>();
+
+        if (node.Keys.Contains(start) && node.IsLeaf)
+        {
+            int index = node.Keys.IndexOf(start);
+
+            // loop through subsequent keys throughout subsequent leaf nodes, until end is found
+            while (node != null &&
+                node.Keys[index] >= start &&
+                node.Keys[index] <= end
+            )
+            {
+                List<Record> recordList = node.Records[index];
+                for (int j = 0; j < recordList.Count; j++)
+                {
+                    results.Add(recordList[j]);
+                    counter++;
+                    // Console.WriteLine(new string(recordList[j].getTConst()) + "\t" + recordList[j].getAverageRating() + "\t" + recordList[j].getNumVotes() + "\t\t" + recordList[j].getRecordID());
+                }
+                index++;
+                if (index >= node.Keys.Count)
+                {
+                    Node tmp = node;
+                    node = node.next;
+                    accessedNodes++;
+                    index = 0;
+                }
+            }
+            Console.WriteLine("Total records found: " + counter);
+            Console.WriteLine("Total nodes accessed: " + accessedNodes);
+
+            double sum = 0;
+            for (int i = 0; i < results.Count; i++)
+            {
+                sum += results[i].getAverageRating();
+            }
+            Console.WriteLine("Average of averageRating: " + sum / results.Count);
+            
+            Console.WriteLine();
+            return;
+        }
+
+        Console.WriteLine("No records found");
         Console.WriteLine("Total nodes accessed: " + accessedNodes);
-        
+        Console.WriteLine();
     }
 }
