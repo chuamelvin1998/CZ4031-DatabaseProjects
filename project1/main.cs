@@ -82,15 +82,26 @@ class Program2
                 bPlusTree.Insert(record);
             }
         }
+
         bPlusTree.PrintMaxKeys();
         bPlusTree.PrintTotalNodes();
         bPlusTree.PrintNumberOfLevels();
         bPlusTree.PrintRootNode();
-        // bPlusTree.PrintLayerByLayer();
         stopwatch.Stop();
         Console.WriteLine("Time elapsed: {0}", stopwatch.Elapsed);
 
         Console.WriteLine("Finished Experiment 2...\n");
+
+        //experiment 3 - Searching
+        Console.WriteLine("Running Experiment 3...");
+
+        // bPlusTree.PrintLayerByLayer();
+        bPlusTree.Query(500);
+        bPlusTree.Query(30000,40000);
+
+        Console.WriteLine("Finished Experiment 3...\n");
+
+
         
 
     }
