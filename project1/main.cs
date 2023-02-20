@@ -79,7 +79,7 @@ class Program2
 
         foreach(Block block in disk.getBlocks()){
             foreach(Record record in block.getRecords()){
-                bPlusTree.Insert(record.getNumVotes());
+                bPlusTree.Insert(record);
             }
         }
         bPlusTree.PrintMaxKeys();

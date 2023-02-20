@@ -10,13 +10,16 @@ class BPlusTree
         _root.IsLeaf = true;
     }
 
-    public void Insert(int key)
+    public void Insert(Record record)
     {
-        _root = Insert(_root, key);
+        _root = Insert(_root, record);
     }
 
-    private Node Insert(Node node, int key)
-    {
+    private Node Insert(Node node, Record record)
+    {   
+        // Select index
+        int key = record.getNumVotes();
+
         // If the node is a leaf node, insert the key
         if (node.IsLeaf)
         {
@@ -44,7 +47,7 @@ class BPlusTree
         }
 
         Node child = node.Children[i];
-        Node newChild = Insert(child, key);
+        Node newChild = Insert(child, record);
         if (
             newChild != child // if not inserted into direct child
         )
