@@ -63,7 +63,7 @@ class Program2
         //experiment 1
         Console.WriteLine("total Blocks: " + disk.getNumberOfBlocks());
         Console.WriteLine("total Records: " + (lineCounter - HEADER_ROWS));
-        Console.WriteLine("size of each Record: " + (sizeof(char) * 9 + sizeof(double) + 2*sizeof(int)).ToString());
+        Console.WriteLine("size of each Record: " + (sizeof(char) * 10 + sizeof(double) + 2*sizeof(int)).ToString());
         Console.WriteLine("Number of Records in each block: " + (200/(sizeof(char) * 9 + sizeof(double) + 2*sizeof(int))).ToString());
 
     }
