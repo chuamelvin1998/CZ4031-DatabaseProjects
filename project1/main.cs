@@ -64,10 +64,10 @@ class Program2
 
         //experiment 1 - storage
         Console.WriteLine("\nRunning Experiment 1...");
-        Console.WriteLine("total Blocks: " + disk.getNumberOfBlocks());
-        Console.WriteLine("total Records: " + (lineCounter - HEADER_ROWS));
-        Console.WriteLine("size of each Record: " + (sizeof(char) * 9 + sizeof(double) + 2*sizeof(int)).ToString());
         Console.WriteLine("Number of Records in each block: " + (200/(sizeof(char) * 9 + sizeof(double) + 2*sizeof(int))).ToString());
+        Console.WriteLine("size of each Record: " + (sizeof(char) * 10 + sizeof(double) + 2*sizeof(int)).ToString());
+        Console.WriteLine("total Records: " + (lineCounter - HEADER_ROWS));
+        Console.WriteLine("total Blocks: " + disk.getNumberOfBlocks());
         Console.WriteLine("Finished Experiment 1...\n");
 
         //experiment 2 - B+ tree
@@ -101,5 +101,11 @@ class Program2
         Console.WriteLine("Running Experiment 4...");
         bPlusTree.Query(30000,40000);
         Console.WriteLine("Finished Experiment 4...\n");
+
+        //experiment 5 - Deletion
+        Console.WriteLine("Running Experiment 5...");
+        bPlusTree.Query(1000);
+        
+        Console.WriteLine("Finished Experiment 5...\n");
     }
 }
