@@ -116,7 +116,10 @@ class Program2
 
         //experiment 5 - Deletion
         Console.WriteLine("Running Experiment 5...");
-        bPlusTree.Query(1000);
+        bPlusTree.Delete(1000);
+        bPlusTree.PrintTotalNodes();
+        bPlusTree.PrintNumberOfLevels();
+        bPlusTree.PrintRootNode();
         bruteForceAlgo.deleteEqual(1000);
         Console.WriteLine("Finished Experiment 5...\n");
     }

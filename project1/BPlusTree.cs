@@ -1,3 +1,5 @@
+using System.Diagnostics;
+
 class BPlusTree
 {
     private Node _root;
@@ -79,10 +81,8 @@ class BPlusTree
         right.Keys =
             node.Keys.GetRange(splitIndex, node.Keys.Count - splitIndex);
 
-        
         right.Records =
             node.Records.GetRange(splitIndex, node.Records.Count - splitIndex);
-        
 
         node.Keys.RemoveRange(splitIndex, node.Keys.Count - splitIndex);
         node.Records.RemoveRange(splitIndex, node.Records.Count - splitIndex);
@@ -369,6 +369,8 @@ class BPlusTree
     // write a query function that takes a key and returns all nodes that contains the key
     public void Query(int start, int end)
     {
+        Stopwatch stopwatch = new Stopwatch();
+        stopwatch.Start();
         Console
             .WriteLine("Querying for keys between " +
             start +
@@ -424,12 +426,13 @@ class BPlusTree
         List<Record> results = new List<Record>();
 
         if (node.IsLeaf)
-        {   
+        {
             // go to next node if start key larger than all keys in current node
             if (node.Keys[node.Keys.Count - 1] < start)
             {
                 node = node.next;
-                Console.WriteLine("Accessing next node because start key larger than all keys...");
+                Console
+                    .WriteLine("Accessing next node because start key larger than all keys...");
                 Console.Write("Accessing node: { ");
                 for (int i = 0; i < node.Keys.Count; i++)
                 {
@@ -439,7 +442,8 @@ class BPlusTree
                 accessedNodes++;
             }
 
-            int index = node.Keys.IndexOf(node.Keys.Where(x => x >= start).Min());
+            int index =
+                node.Keys.IndexOf(node.Keys.Where(x => x >= start).Min());
 
             // loop through subsequent keys throughout subsequent leaf nodes, until end is found
             while (node != null &&
@@ -472,22 +476,149 @@ class BPlusTree
             {
                 dataBlocks.Add(results[i].getDataBlockID());
             }
-            Console.WriteLine("Total data blocks accessed: " + dataBlocks.Count);
-
+            Console
+                .WriteLine("Total data blocks accessed: " + dataBlocks.Count);
 
             double sum = 0;
             for (int i = 0; i < results.Count; i++)
             {
                 sum += results[i].getAverageRating();
             }
-            Console.WriteLine("Average of averageRating: " + sum / results.Count);
-            
+            Console
+                .WriteLine("Average of averageRating: " + sum / results.Count);
+            stopwatch.Stop();
+            Console.WriteLine("Time elapsed for query: {0}", stopwatch.Elapsed);
             Console.WriteLine();
             return;
         }
 
         Console.WriteLine("No records found");
         Console.WriteLine("Total nodes accessed: " + accessedNodes);
+        stopwatch.Stop();
+        Console.WriteLine("Time elapsed for query: {0}", stopwatch.Elapsed);
         Console.WriteLine();
+
+    }
+
+    public void Delete(int key)
+    {
+        Console.WriteLine("Deleting key " + key + "...");
+        Stopwatch stopwatch = new Stopwatch();
+        stopwatch.Start();
+        Node node = _root;
+
+        while (!node.IsLeaf)
+        {
+            int i = 0;
+            while (i < node.Keys.Count && key > node.Keys[i])
+            {
+                i++;
+            }
+
+            node = node.Children[i];
+        }
+
+        int index = node.Keys.IndexOf(key);
+
+        if (index != -1)
+        {
+            Console.WriteLine("Number of records being deleted: " + node.Records[index].Count);
+            node.Keys.RemoveAt (index);
+            node.Records.RemoveAt (index);
+
+            // rebalance the tree
+            Node parent = FindParent(_root, node);
+            while (parent != null)
+            {
+                // check if number of keys are less than the minimum for a leaf node
+                if (node.Keys.Count < (MAX_KEYS + 1) / 2)
+                {
+                    // find the index of the node in the parent's children
+                    int i = parent.Children.IndexOf(node);
+
+                    // try to redistribute keys from adjacent nodes
+                    // if the left sibling has spare keys to borrow
+                    if (
+                        i > 0 &&
+                        parent.Children[i - 1].Keys.Count > (MAX_KEYS + 1) / 2
+                    )
+                    {
+                        Node leftSibling = parent.Children[i - 1];
+
+                        // move the last key from the left sibling to the current node
+                        node
+                            .Keys
+                            .Insert(0,
+                            leftSibling.Keys[leftSibling.Keys.Count - 1]);
+                        node
+                            .Records
+                            .Insert(0,
+                            leftSibling.Records[leftSibling.Records.Count - 1]);
+                        leftSibling.Keys.RemoveAt(leftSibling.Keys.Count - 1);
+                        leftSibling
+                            .Records
+                            .RemoveAt(leftSibling.Records.Count - 1);
+
+                        // update the parent key
+                        parent.Keys[i - 1] = node.Keys[0];
+                    }
+                    // if the right sibling has spare keys to borrow
+                    else if (
+                        i < parent.Children.Count - 1 &&
+                        parent.Children[i + 1].Keys.Count > (MAX_KEYS + 1) / 2
+                    )
+                    {
+                        Node rightSibling = parent.Children[i + 1];
+
+                        // move the first key from the right sibling to the current node
+                        node.Keys.Add(rightSibling.Keys[0]);
+                        node.Records.Add(rightSibling.Records[0]);
+                        rightSibling.Keys.RemoveAt(0);
+                        rightSibling.Records.RemoveAt(0);
+
+                        // update the parent key
+                        parent.Keys[i] = rightSibling.Keys[0];
+                    }
+                    // neither sibling has spare keys to borrow
+                    else
+                    {
+                        // merge with a sibling node
+                        if (i > 0)
+                        {
+                            // merge with left sibling
+                            Node leftSibling = parent.Children[i - 1];
+
+                            // move all keys and records from current node to left sibling
+                            leftSibling.Keys.AddRange(node.Keys);
+                            leftSibling.Records.AddRange(node.Records);
+
+                            // remove current node from parent and adjust index
+                            parent.Keys.RemoveAt(i - 1);
+                            parent.Children.RemoveAt (i);
+                            node = leftSibling;
+                        }
+                        else
+                        {
+                            // merge with right sibling
+                            Node rightSibling = parent.Children[i + 1];
+
+                            // move all keys and records from right sibling to current node
+                            node.Keys.AddRange(rightSibling.Keys);
+                            node.Records.AddRange(rightSibling.Records);
+
+                            // remove right sibling from parent and adjust index
+                            parent.Keys.RemoveAt (i);
+                            parent.Children.RemoveAt(i + 1);
+                        }
+                    }
+                }
+
+                // move up to the parent and check again
+                node = parent;
+                parent = FindParent(_root, node);
+            }
+        }
+        stopwatch.Stop();
+        Console.WriteLine("Time elapsed for delete: {0}", stopwatch.Elapsed);
     }
 }
