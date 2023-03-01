@@ -1,3 +1,5 @@
+using System.Diagnostics;
+
 class BruteForceAlgo
 {
     private Disk disk;
@@ -8,7 +10,9 @@ class BruteForceAlgo
     }
 
     public int queryEqual(int numVotes)
-    {
+    {   
+        Stopwatch stopwatch = new Stopwatch();
+        stopwatch.Start();
         int countRecordEqual = 0;
         int countDataBlockAccessed = 0;
 
@@ -27,13 +31,17 @@ class BruteForceAlgo
             }
         }
 
-        Console.WriteLine("Data Block Accessed Count: " + countDataBlockAccessed.ToString());
+        Console.WriteLine("Brute Force Data Block Accessed Count: " + countDataBlockAccessed.ToString());
+        stopwatch.Stop();
+        Console.WriteLine("Brute Force Time Elapsed: {0}", stopwatch.Elapsed);
 
         return countRecordEqual;
     }
 
     public int queryRange(int numVotes1, int numVotes2)
     {
+        Stopwatch stopwatch = new Stopwatch();
+        stopwatch.Start();
         int countRecordInRange = 0;
         int countDataBlockAccessed = 0;
 
@@ -52,13 +60,17 @@ class BruteForceAlgo
             }
         }
 
-        Console.WriteLine("Data Block Accessed Count: " + countDataBlockAccessed.ToString());
+        Console.WriteLine("Brute Force Data Block Accessed Count: " + countDataBlockAccessed.ToString());
+        stopwatch.Stop();
+        Console.WriteLine("Brute Force Time Elapsed: {0}", stopwatch.Elapsed);
 
         return countRecordInRange;
     }
 
     public void deleteEqual(int numVotes)
     {
+        Stopwatch stopwatch = new Stopwatch();
+        stopwatch.Start();
         int countDataBlockAccessed = 0;
         int countRecordDeleted = 0;
         for (int i = 0; i < disk.getBlocks().Count; i++)
@@ -77,8 +89,11 @@ class BruteForceAlgo
             }
         }
 
-        Console.WriteLine("Data Block Accessed Count: " + countDataBlockAccessed.ToString());
+        Console.WriteLine();
+        Console.WriteLine("Brute Force Data Block Accessed Count: " + countDataBlockAccessed.ToString());
         Console.WriteLine(countRecordDeleted.ToString() + " records deleted");
+        stopwatch.Stop();
+        Console.WriteLine("Brute Force Time Elapsed: {0}", stopwatch.Elapsed);
     }
 
 }
