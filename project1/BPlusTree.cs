@@ -75,26 +75,28 @@ class BPlusTree
     private Node SplitLeafNode(Node node)
     {
         int splitIndex = (int) Math.Ceiling(node.Keys.Count / 2.0);
-        var left = new Node();
-        left.Keys = node.Keys.GetRange(0, splitIndex);
         var right = new Node();
         right.Keys =
             node.Keys.GetRange(splitIndex, node.Keys.Count - splitIndex);
-        right.IsLeaf = true;
 
-        left.IsLeaf = right.IsLeaf = true;
-        left.Records = node.Records.GetRange(0, splitIndex);
+        
         right.Records =
             node.Records.GetRange(splitIndex, node.Records.Count - splitIndex);
+        
 
-        left.next = right;
+        node.Keys.RemoveRange(splitIndex, node.Keys.Count - splitIndex);
+        node.Records.RemoveRange(splitIndex, node.Records.Count - splitIndex);
+
+        right.next = node.next;
+        node.next = right;
+        node.IsLeaf = right.IsLeaf = true;
 
         // Set the pointers to the new nodes
         if (node == _root)
         {
             _root = new Node();
             _root.Keys.Add(right.Keys[0]);
-            _root.Children.Add (left);
+            _root.Children.Add (node);
             _root.Children.Add (right);
             _root.IsLeaf = false;
             node = _root;
@@ -104,7 +106,7 @@ class BPlusTree
             Node parent = FindParent(_root, node);
             int j = parent.Children.IndexOf(node);
             parent.Keys.Insert(j, right.Keys[0]);
-            parent.Children[j] = left;
+            parent.Children[j] = node;
             parent.Children.Insert(j + 1, right);
             if (parent.Keys.Count > MAX_KEYS)
             {
@@ -421,9 +423,23 @@ class BPlusTree
         //list of Node results
         List<Record> results = new List<Record>();
 
-        if (node.Keys.Contains(start) && node.IsLeaf)
-        {
-            int index = node.Keys.IndexOf(start);
+        if (node.IsLeaf)
+        {   
+            // go to next node if start key larger than all keys in current node
+            if (node.Keys[node.Keys.Count - 1] < start)
+            {
+                node = node.next;
+                Console.WriteLine("Accessing next node because start key larger than all keys...");
+                Console.Write("Accessing node: { ");
+                for (int i = 0; i < node.Keys.Count; i++)
+                {
+                    Console.Write(node.Keys[i] + " ");
+                }
+                Console.WriteLine("}");
+                accessedNodes++;
+            }
+
+            int index = node.Keys.IndexOf(node.Keys.Where(x => x >= start).Min());
 
             // loop through subsequent keys throughout subsequent leaf nodes, until end is found
             while (node != null &&
