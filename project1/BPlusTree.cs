@@ -464,7 +464,16 @@ class BPlusTree
                 }
             }
             Console.WriteLine("Total records found: " + counter);
-            Console.WriteLine("Total nodes accessed: " + accessedNodes);
+            Console.WriteLine("Total index nodes accessed: " + accessedNodes);
+
+            // Count the number of data blocks accessed
+            HashSet<int> dataBlocks = new HashSet<int>();
+            for (int i = 0; i < results.Count; i++)
+            {
+                dataBlocks.Add(results[i].getDataBlockID());
+            }
+            Console.WriteLine("Total data blocks accessed: " + dataBlocks.Count);
+
 
             double sum = 0;
             for (int i = 0; i < results.Count; i++)
