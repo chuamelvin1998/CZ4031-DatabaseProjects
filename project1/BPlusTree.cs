@@ -63,7 +63,7 @@ class BPlusTree
         Node child = node.Children[i];
         Node newChild = Insert(child, record);
         if (
-            newChild != child // if not inserted into direct child
+            newChild != child
         )
         {
             if (node.Keys.Count > MAX_KEYS)
@@ -91,7 +91,6 @@ class BPlusTree
         node.next = right;
         node.IsLeaf = right.IsLeaf = true;
 
-        // Set the pointers to the new nodes
         if (node == _root)
         {
             _root = new Node();
@@ -132,8 +131,6 @@ class BPlusTree
                 .Children
                 .GetRange(splitIndex, node.Children.Count - splitIndex);
 
-        // Set the pointers to the new nodes
-        // if node is root or findparent is null
         if (node == _root || FindParent(_root, node) == null)
         {
             _root = new Node();
@@ -189,13 +186,12 @@ class BPlusTree
     private void Print(Node node)
     {
         if (
-            node == null // added null check
+            node == null
         )
         {
             return;
         }
 
-        // if leaf node
         if (node.IsLeaf)
         {
             Console.Write("[ ");
@@ -204,7 +200,7 @@ class BPlusTree
                 Console.Write(node.Keys[i] + " ");
             }
             Console.Write("].. ");
-        } // Non-leaf node resursive
+        }
         else
         {
             for (int i = 0; i < node.Children.Count; i++)
@@ -366,7 +362,6 @@ class BPlusTree
         Query (key, key);
     }
 
-    // write a query function that takes a key and returns all nodes that contains the key
     public void Query(int start, int end)
     {
         Stopwatch stopwatch = new Stopwatch();
@@ -390,7 +385,6 @@ class BPlusTree
         {
             accessedNodes++;
 
-            //print node
             Console.Write("Accessing node: { ");
             for (int i = 0; i < node.Keys.Count; i++)
             {
@@ -412,7 +406,6 @@ class BPlusTree
             }
         }
 
-        //print node
         Console.Write("Accessing node: { ");
         for (int i = 0; i < node.Keys.Count; i++)
         {
@@ -422,7 +415,6 @@ class BPlusTree
 
         int counter = 0;
 
-        //list of Node results
         List<Record> results = new List<Record>();
 
         if (node.IsLeaf)
@@ -445,7 +437,6 @@ class BPlusTree
             int index =
                 node.Keys.IndexOf(node.Keys.Where(x => x >= start).Min());
 
-            // loop through subsequent keys throughout subsequent leaf nodes, until end is found
             while (node != null &&
                 node.Keys[index] >= start &&
                 node.Keys[index] <= end
@@ -456,6 +447,7 @@ class BPlusTree
                 {
                     results.Add(recordList[j]);
                     counter++;
+                    // NOTE: Uncomment this to print results
                     // Console.WriteLine(new string(recordList[j].getTConst()) + "\t" + recordList[j].getAverageRating() + "\t" + recordList[j].getNumVotes() + "\t\t" + recordList[j].getRecordID());
                 }
                 index++;
@@ -536,7 +528,6 @@ class BPlusTree
                     // find the index of the node in the parent's children
                     int i = parent.Children.IndexOf(node);
 
-                    // try to redistribute keys from adjacent nodes
                     // if the left sibling has spare keys to borrow
                     if (
                         i > 0 &&
@@ -570,29 +561,24 @@ class BPlusTree
                     {
                         Node rightSibling = parent.Children[i + 1];
 
-                        // move the first key from the right sibling to the current node
                         node.Keys.Add(rightSibling.Keys[0]);
                         node.Records.Add(rightSibling.Records[0]);
                         rightSibling.Keys.RemoveAt(0);
                         rightSibling.Records.RemoveAt(0);
 
-                        // update the parent key
                         parent.Keys[i] = rightSibling.Keys[0];
                     }
                     // neither sibling has spare keys to borrow
                     else
                     {
-                        // merge with a sibling node
                         if (i > 0)
                         {
                             // merge with left sibling
                             Node leftSibling = parent.Children[i - 1];
 
-                            // move all keys and records from current node to left sibling
                             leftSibling.Keys.AddRange(node.Keys);
                             leftSibling.Records.AddRange(node.Records);
 
-                            // remove current node from parent and adjust index
                             parent.Keys.RemoveAt(i - 1);
                             parent.Children.RemoveAt (i);
                             node = leftSibling;
@@ -602,18 +588,15 @@ class BPlusTree
                             // merge with right sibling
                             Node rightSibling = parent.Children[i + 1];
 
-                            // move all keys and records from right sibling to current node
                             node.Keys.AddRange(rightSibling.Keys);
                             node.Records.AddRange(rightSibling.Records);
 
-                            // remove right sibling from parent and adjust index
                             parent.Keys.RemoveAt (i);
                             parent.Children.RemoveAt(i + 1);
                         }
                     }
                 }
 
-                // move up to the parent and check again
                 node = parent;
                 parent = FindParent(_root, node);
             }
