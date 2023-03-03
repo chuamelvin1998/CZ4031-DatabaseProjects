@@ -54,4 +54,8 @@ public struct Record{
 		this.recordID = recordID;
 	}
 
+	public int getDataBlockID() {
+		return (int)Math.Ceiling((double)recordID/5);
+	}
+
     }

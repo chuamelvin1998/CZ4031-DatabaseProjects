@@ -1,4 +1,6 @@
 
+using System.Diagnostics;
+
 class Program2
 {
     static void Main(string[] args)
@@ -10,13 +12,15 @@ class Program2
 
 
         Disk disk = new Disk();
-        Block newBlock = new Block( blockCounter);
+        Block newBlock = new Block(blockCounter);
         DataExplore dataExplore = new DataExplore();
 
-        foreach (string line in System.IO.File.ReadLines("data.tsv")){  
+        foreach (string line in System.IO.File.ReadLines("data.tsv"))
+        {
             string[] subs = line.Split('	');
 
-            if(lineCounter == 0){
+            if (lineCounter == 0)
+            {
                 lineCounter++;
                 continue;
             }
@@ -27,23 +31,27 @@ class Program2
             newRecord.setAverageRating(double.Parse(subs[1]));
             newRecord.setNumVotes(int.Parse(subs[2]));
 
-            if(newBlock.getRecords().Count < 5){
+            if (newBlock.getRecords().Count < 5)
+            {
                 newBlock.addNewRecord(newRecord);
-            }else{
+            }
+            else
+            {
                 newBlock.setBlockSize();
                 disk.addNewBlock(newBlock);
                 blockCounter++;
                 newBlock = new Block(blockCounter);
                 newBlock.addNewRecord(newRecord);
             }
-           
+
             // each record is 36bytes, each block is 200/34 = 5.5, 5records each
             //   Console.WriteLine(sizeof(char) * 10 + sizeof(double) + 2*sizeof(int));
-            lineCounter++;  
+            lineCounter++;
         }
 
         // if there are any records left in the last block, add it to the disk
-        if(newBlock.getRecords().Count > 0 & newBlock.getRecords().Count < 5){
+        if (newBlock.getRecords().Count > 0 & newBlock.getRecords().Count < 5)
+        {
             newBlock.setBlockSize();
             disk.addNewBlock(newBlock);
             blockCounter++;
@@ -60,11 +68,59 @@ class Program2
         Block testBlock2 = disk.getBlocks()[^1];
         testBlock2.printRecords();
 
-        //experiment 1
-        Console.WriteLine("Number of Records in each block: " + (200/(sizeof(char) * 9 + sizeof(double) + 2*sizeof(int))).ToString());
-        Console.WriteLine("size of each Record: " + (sizeof(char) * 10 + sizeof(double) + 2*sizeof(int)).ToString());
+        //experiment 1 - storage
+        Console.WriteLine("\nRunning Experiment 1...");
+        Console.WriteLine("Number of Records in each block: " + (200 / (sizeof(char) * 9 + sizeof(double) + 2 * sizeof(int))).ToString());
+        Console.WriteLine("size of each Record: " + (sizeof(char) * 10 + sizeof(double) + 2 * sizeof(int)).ToString());
         Console.WriteLine("total Records: " + (lineCounter - HEADER_ROWS));
         Console.WriteLine("total Blocks: " + disk.getNumberOfBlocks());
+        Console.WriteLine("Finished Experiment 1...\n");
 
+        //experiment 2 - B+ tree
+        Console.WriteLine("Running Experiment 2...");
+        //measure time
+        Stopwatch stopwatch = new Stopwatch();
+        stopwatch.Start();
+        BPlusTree bPlusTree = new BPlusTree();
+
+        foreach (Block block in disk.getBlocks())
+        {
+            foreach (Record record in block.getRecords())
+            {
+                bPlusTree.Insert(record);
+            }
+        }
+
+        bPlusTree.PrintMaxKeys();
+        bPlusTree.PrintTotalNodes();
+        bPlusTree.PrintNumberOfLevels();
+        bPlusTree.PrintRootNode();
+        stopwatch.Stop();
+        Console.WriteLine("Time elapsed: {0}", stopwatch.Elapsed);
+
+        Console.WriteLine("Finished Experiment 2...\n");
+
+        //experiment 3 - Searching
+        BruteForceAlgo bruteForceAlgo = new BruteForceAlgo(disk);
+        Console.WriteLine("Running Experiment 3...");
+        bPlusTree.Query(500);
+        bruteForceAlgo.queryEqual(500);
+        Console.WriteLine("Finished Experiment 3...\n");
+
+        //experiment 4 - Ranged Searching
+
+        Console.WriteLine("Running Experiment 4...");
+        bPlusTree.Query(30000, 40000);
+        bruteForceAlgo.queryRange(30000, 40000);
+        Console.WriteLine("Finished Experiment 4...\n");
+
+        //experiment 5 - Deletion
+        Console.WriteLine("Running Experiment 5...");
+        bPlusTree.Delete(1000);
+        bPlusTree.PrintTotalNodes();
+        bPlusTree.PrintNumberOfLevels();
+        bPlusTree.PrintRootNode();
+        bruteForceAlgo.deleteEqual(1000);
+        Console.WriteLine("Finished Experiment 5...\n");
     }
 }
