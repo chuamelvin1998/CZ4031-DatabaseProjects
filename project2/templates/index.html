@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title></title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <style>
+        body {
+        background-color: linen;
+        }
+        h1{
+        color: black;
+        font: bold;
+        text-align: center;
+        }
+        form label{
+            font-weight:bold;
+        }
+        #submitBtn{
+            background-color: #FFFFFF;
+            border: 1px solid #222222;
+            border-radius: 8px;
+            box-sizing: border-box;
+            color: #222222;
+            cursor: pointer;
+            display: inline-block;
+            font-family: Circular,-apple-system,BlinkMacSystemFont,Roboto,"Helvetica Neue",sans-serif;
+            font-size: 16px;
+            font-weight: 600;
+            line-height: 20px;
+            margin: 0;
+            outline: none;
+            padding: 13px 23px;
+            position: relative;
+            text-align: center;
+            text-decoration: none;
+            touch-action: manipulation;
+            transition: box-shadow .2s,-ms-transform .1s,-webkit-transform .1s,transform .1s;
+            user-select: none;
+            -webkit-user-select: none;
+            width: auto;
+            position: absolute;
+        }
+        .bt-btn {
+            margin: 0 auto;
+            text-align: right;
+            width: 50%;
+        }
+        textarea {
+            margin-top: 10px;
+            margin-left: 50px;
+            width: 500px;
+            height: 100px;
+            -moz-border-bottom-colors: none;
+            -moz-border-left-colors: none;
+            -moz-border-right-colors: none;
+            -moz-border-top-colors: none;
+            background: none repeat scroll 0 0 rgba(0, 0, 0, 0.07);
+            border-color: -moz-use-text-color #FFFFFF #FFFFFF -moz-use-text-color;
+            border-image: none;
+            border-radius: 6px 6px 6px 6px;
+            border-style: none solid solid none;
+            border-width: medium 1px 1px medium;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12) inset;
+            color: #555555;
+            font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+            font-size: 1em;
+            line-height: 1.4em;
+            padding: 5px 8px;
+            transition: background-color 0.2s ease 0s;
+        }
+        textarea:focus {
+            background: none repeat scroll 0 0 #FFFFFF;
+            outline-width: 0;
+        }
+        /* form{
+            padding-left: 40px;
+            padding-right: 40px;
+        } */
+        </style>
+</head>
+<body>
+    <div>
+        <h1>CZ4031 Project 2</h1>
+        <form>
+            <div class="container">
+                <div class="row">
+                  <div class="col">
+                    <div id="q1div" class="inline-div" class="mb-3">
+                        <label for="query1" >Query 1</label>
+                        <textarea id="query1" name="query1" rows="6"></textarea>
+                    </div>
+                  </div>
+                  <div class="col">
+                    <div id="q2div" class="inline-div" class="mb-3">
+                        <label for="query2">Query 2</label>
+                        <textarea id="query2" name="query2" rows="6"></textarea>
+                    </div>
+                  </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                    </div>
+                    <div class="col">
+                    </div>
+                    <div class="col">
+                        <div class="bt-btn">
+                            <button id="submitBtn" type="submit" >Submit</button>
+                        </div>
+                    </div>
+                  </div>
+              </div>
+        </form>
+    </div>
+</body>
+</html>
