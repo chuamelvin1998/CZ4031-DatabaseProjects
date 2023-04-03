@@ -1,35 +1,36 @@
-import psycopg2
+"""
+Returns a dictionary of the differences between two query plans in the format: 
+{key_containing_change: [query1_value, query2_value]}
+"""
 
-# CHANGE HERE
-conn = psycopg2.connect(
-    host="localhost",
-    database="TPC-H",
-    user="postgres",
-    password="postgres"
-)
+def get_query_plan_diff(conn, query1, query2):
+    cur = conn.cursor()
+    cur.execute("EXPLAIN (FORMAT JSON) " + query1)
+    plan1 = cur.fetchall()[0][0][0]["Plan"]
+    print("Plan 1: ", plan1)
+    print()
 
-# CHANGE HERE
-query1 = "SELECT * FROM customer WHERE c_acctbal < 500 AND c_nationkey = 1;"
-query2 = "SELECT * FROM customer WHERE c_nationkey = 1;"
+    cur.execute("EXPLAIN (FORMAT JSON) " + query2)
+    plan2 = cur.fetchall()[0][0][0]["Plan"]
+    print("Plan 2: ", plan2)
+    print()
 
-cur = conn.cursor()
+    cur.close()
+    conn.close()
 
-cur.execute("EXPLAIN (FORMAT JSON) " + query1)
-plan1 = cur.fetchall()
-print("Plan 1:")
-for row in plan1:
-    print(row)
+    diff = {}
 
-cur.execute("EXPLAIN (FORMAT JSON) " + query2)
-plan2 = cur.fetchall()
-print("Plan 2:")
-for row in plan2:
-    print(row)
+    for key in plan1:
+        if key not in plan2:
+            diff[key] = [plan1[key], None]
+        elif plan1[key] != plan2[key]:
+            diff[key] = [plan1[key], plan2[key]]
+    for key2 in plan2:
+        if key2 not in plan1:
+            diff[key2] = [None, plan2[key2]]
+    
+    print("Differences: ", diff)
 
-# diff = set(plan1).difference(set(plan2))
-# print("Difference:")
-# for row in diff:
-#     print(row)
+    return diff
 
-cur.close()
-conn.close()
+
