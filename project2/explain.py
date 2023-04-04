@@ -1,7 +1,9 @@
-"""
-Returns a dictionary of the differences between two query plans in the format: 
-{key_containing_change: [query1_value, query2_value]}
-"""
+def explain_query(conn, query):
+    cur = conn.cursor()
+    cur.execute("EXPLAIN (FORMAT JSON) " + query)
+    plan = cur.fetchall()[0][0][0]["Plan"]
+    cur.close()
+    return plan
 
 def get_query_plan_diff(conn, query1, query2):
     cur = conn.cursor()
@@ -16,7 +18,6 @@ def get_query_plan_diff(conn, query1, query2):
     print()
 
     cur.close()
-    conn.close()
 
     diff = {}
 
