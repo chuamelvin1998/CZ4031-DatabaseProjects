@@ -1,7 +1,16 @@
 import PySimpleGUI as sg
-
+from explain import *
+import psycopg2
+import json 
 
 def run_sql_query_compare():
+    conn = psycopg2.connect(
+    host="localhost",
+    database="TPC-H",
+    user="postgres",
+    password="postgres"
+)
+    
     left_col = [
         [sg.Text("Old Query")],[sg.Multiline(key='query-input1', size=(50, 5))]
     ]
@@ -22,7 +31,7 @@ def run_sql_query_compare():
     right_col2 = [
         [sg.Text("New Query Visual Description")],
         [sg.Graph(canvas_size=(canvasSize, canvasSize), graph_bottom_left=(0, 0), graph_top_right=(canvasSize, canvasSize), background_color='white', key='canvas2')],
-        [sg.Text("Old Query Text Description")],
+        [sg.Text("New Query Text Description")],
         [sg.Multiline(key='text-desc2', size=(50, 5),disabled=True)]
     ]
 
@@ -50,7 +59,19 @@ def run_sql_query_compare():
             query2 = values['query-input2']
             
             # Compare the queries and display the differences in the -DIFF- element
-            diff = ""
+            diff = get_query_plan_diff(conn,query1,query2)
+            print(get_query_plan_diff(conn,query1,query2))
+            diff = pretty_print_json(json.dumps(diff, indent=4))
+            window["text-desc-change"].update(diff)
+            # diff = ""
+            q1 = explain_query(conn,query1)
+            q1_pretty = pretty_print_json(json.dumps(q1, indent=4))
+            q2 = explain_query(conn,query2)
+            q2_pretty = pretty_print_json(json.dumps(q2, indent=4))
+            print(q1)
+            print(q2)
+            window["text-desc1"].update(q1_pretty)
+            window["text-desc2"].update(q2_pretty)
             if query1 != query2:
                 # Split the queries into lines and compare them line-by-line
                 query1_lines = query1.split("\n")
@@ -63,10 +84,18 @@ def run_sql_query_compare():
                         diff += f"{query1_lines[i]}\n{'-'*50}\n{query2_lines[i]}\n{'-'*50}\n"
             else:
                 diff = "Queries are identical."
-            window["text-desc-change"].update(diff)
+                window["text-desc-change"].update(diff)
 
     # Close the window when the loop ends
     window.close()
+    conn.close()
+    
+def pretty_print_json(json_str):
+    obj = json.loads(json_str)
+    pretty_str = ""
+    for key, value in obj.items():
+        pretty_str += f"{key}: {value}\n"
+    return pretty_str
 
 if __name__ == '__main__':
     run_sql_query_compare()
