@@ -2,11 +2,13 @@ import tkinter as tk
 from explain import *
 
 FIXED_VERTICAL = 75
+FIXED_HORIZONTAL = 100
 RECT_WIDTH = 100
 RECT_HEIGHT = 50
 CANVAS_WIDTH = 700
 CANVAS_HEIGHT = 700
-
+ALL_RECTANGLES_CANVAS1=[]
+ALL_RECTANGLES_CANVAS2=[]
 
 def process_query_plan(query):
     plan =[]
@@ -27,7 +29,7 @@ def draw_queries(query1, query2):
     root = tk.Tk()
     
     # Create the first canvas and place it on the left side
-    canvas1 = tk.Canvas(root, width=CANVAS_WIDTH, height=CANVAS_HEIGHT, bg='white')
+    canvas1 = tk.Canvas(root, width=CANVAS_WIDTH, height=CANVAS_HEIGHT, bg='white', name="canvas1")
     canvas1.grid(row=0, column=0, padx=20, pady=20)
 
     # Create a frame to hold the widgets inside the first canvas
@@ -54,7 +56,7 @@ def draw_queries(query1, query2):
     canvas1.config(scrollregion=canvas1.bbox('all'))
 
     # Create the second canvas and place it on the right side
-    canvas2 = tk.Canvas(root, width=CANVAS_WIDTH, height=CANVAS_HEIGHT, bg='white')
+    canvas2 = tk.Canvas(root, width=CANVAS_WIDTH, height=CANVAS_HEIGHT, bg='white',name="canvas2")
     canvas2.grid(row=0, column=2, padx=20, pady=20)
 
     # Create a frame to hold the widgets inside the second canvas
@@ -83,41 +85,103 @@ def draw_queries(query1, query2):
     plan1 = process_query_plan(query1)
     plan2 = process_query_plan(query2)
 
-    print(plan1)
-    print(plan2)
+    # print(plan1)
+    # print(plan2)
 
-    draw_plan(canvas1, plan1)
-    draw_plan(canvas2, plan2)
-    
+    array1 =  draw_plan(canvas1, plan1)
+    array2  = draw_plan(canvas2, plan2)
+
+    ALL_RECTANGLES_CANVAS1 = (array1)
+    ALL_RECTANGLES_CANVAS2 = (array2)
+
+    print(ALL_RECTANGLES_CANVAS1)
+
+    draw_arrows(canvas1,ALL_RECTANGLES_CANVAS1)
+    draw_arrows(canvas2,ALL_RECTANGLES_CANVAS2)
+
     # root.mainloop()
+
+def draw_arrows(canvas, array):
+    firstRectIndex = 0
+    secondRectIndex = 1
+
+    while secondRectIndex < len(array):
+        rect1 = array[firstRectIndex]
+        # print("stpt",rect1)
+        startpt = rect_bottom_center(rect1[0],rect1[1],rect1[2],rect1[3])
+
+        rect2 = array[secondRectIndex]
+        # print("endpt",rect2)
+        if type(rect2) is list:
+            rect2 = array[secondRectIndex][0]
+            endpt = rect_top_center(rect2[0],rect2[1],rect2[2],rect2[3])
+            canvas.create_line(startpt[0],startpt[1],endpt[0],endpt[1])
+
+            rect1 = array[secondRectIndex][0]
+            startpt = rect_bottom_center(rect1[0],rect1[1],rect1[2],rect1[3])
+
+            rect2 = array[secondRectIndex][1][0]
+            endpt = rect_top_center(rect2[0],rect2[1],rect2[2],rect2[3])
+            canvas.create_line(startpt[0],startpt[1],endpt[0],endpt[1])
+
+            rect2 = array[secondRectIndex][2][0]
+            endpt = rect_top_center(rect2[0],rect2[1],rect2[2],rect2[3])
+            canvas.create_line(startpt[0],startpt[1],endpt[0],endpt[1])
+        
+            draw_arrows(canvas, array[secondRectIndex][1])
+            draw_arrows(canvas, array[secondRectIndex][2])
+        elif type(rect2) is tuple:
+            endpt = rect_top_center(rect2[0],rect2[1],rect2[2],rect2[3])
+            canvas.create_line(startpt[0],startpt[1],endpt[0],endpt[1])
+        firstRectIndex+=1
+        secondRectIndex+=1
+
+def rect_top_center(x1, y1, x2, y2):
+    return (x1 + x2) / 2, y1
     
-def draw_plan(canvas,plan):
-    county = 0
-    countx = 1
+def rect_bottom_center(x1, y1, x2, y2):
+    return (x1 + x2) / 2, y2
+
+def draw_plan(canvas,plan,countx=4,county=0):
+    countx =countx
+    county = county
+    temparray = []
     while plan:
-        print("plan: ",plan)
         node = plan.pop(0)
+        print(node)
         if type(node) is list:
-            for subnode in node:
-                if("|" in subnode):
-                    temp = subnode.split("|")
-                    plan.append(temp[0])
-                    plan.append(temp[1])
-                elif "Join" in subnode:
-                    draw_rectangle(canvas, subnode, county)
-                    county+=1
-                    # left = subnode[1]
-                    # draw_plan(canvas,left)
-                    # right = subnode[2]
-                    # draw_plan(canvas,right)
-                else:
+            if "Join" in node[0]:
+                coords = draw_rectangle(canvas, node[0],countx, county)
+                county+=1
+                left = node[1]
+                right = node[2]
+                leftArray = draw_plan(canvas,left,countx-1,county)
+                rightArray = draw_plan(canvas,right,countx+1,county)
+
+                temparray.append([coords,leftArray,rightArray])
+
+            else:
+                for subnode in node:
                     plan.append(subnode)
-        else:
-            draw_rectangle(canvas, node, county)
+        elif ("|" in node):
+            temp = node.split("|")
+            coords1 = draw_rectangle(canvas, temp[0],countx, county)
+            county+=1
+            coords2 = draw_rectangle(canvas, temp[1] ,countx, county)
             county+=1
 
+            temparray.append(coords1)
+            temparray.append(coords2)
+        else:
+            coords = draw_rectangle(canvas, node,countx, county)
+            county+=1
 
-def draw_rectangle(canvas, text, county):
+            temparray.append(coords)
+    
+    return temparray
+
+
+def draw_rectangle(canvas, text,countx, county):
     color = ""
 
     if "Scan" in text:
@@ -127,11 +191,15 @@ def draw_rectangle(canvas, text, county):
     else:
         color = "light grey"
 
-    canvas_x = (CANVAS_WIDTH - RECT_WIDTH) / 2
-    rect = canvas.create_rectangle(canvas_x, 10+county*FIXED_VERTICAL, canvas_x+RECT_WIDTH, RECT_HEIGHT+county*FIXED_VERTICAL, fill=color)
+    # canvas_x = (CANVAS_WIDTH - RECT_WIDTH) / 2
+    rect = canvas.create_rectangle(countx*FIXED_HORIZONTAL, 10+county*FIXED_VERTICAL,RECT_WIDTH+countx*FIXED_HORIZONTAL, RECT_HEIGHT+county*FIXED_VERTICAL, fill=color)
     rect_coords = canvas.bbox(rect)
     rect_center_x = (rect_coords[0] + rect_coords[2]) / 2
     rect_center_y = (rect_coords[1] + rect_coords[3]) / 2
     canvas.create_text(rect_center_x, rect_center_y, text=text, fill='black')
+
+    return rect_coords
+
+
 
 
