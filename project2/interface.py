@@ -61,20 +61,25 @@ def run_sql_query_compare():
             # Compare the queries and display the differences in the -DIFF- element
             diff = get_query_plan_diff(conn,query1,query2)
             print(get_query_plan_diff(conn,query1,query2))
-            print(diff['Node Type'][0])
-            if (diff['Node Type'][0] != diff['Node Type'][1]):
+            friendlyText = "All these are due to the changes made from the old query to the new query:"
+            if (diff.get('Node Type') and diff['Node Type'][0] != diff['Node Type'][1]):
                 nodeType = f"It uses {diff['Node Type'][0]} in the old query and has evolved to using {diff['Node Type'][1]} in the new query. "
-            if (diff['Strategy'][0] != diff['Strategy'][1]):
+                friendlyText.append(nodeType)
+            if (diff.get('Strategy') and diff['Strategy'][0] != diff['Strategy'][1]):
                 if (diff['Strategy'][0] == None):
                     strategyType = f"It does not use any strategy in the old query and has evolved to using {diff['Strategy'][1]} strategy in the new query. "
-                if (diff['Strategy'][1] == None):
+                elif (diff['Strategy'][1] == None):
                     strategyType = f"It uses {diff['Strategy'][0]} strategy in the old query and has evolved to using no strategy in the new query. "
-            if (diff['Startup Cost'][0] != diff['Startup Cost'][1]):
+                else:
+                    strategyType = f"It uses {diff['Strategy'][0]} strategy in the old query and has evolved to using {diff['Strategy'][1]} strategy in the new query. "
+                friendlyText.append(strategyType)
+            if (diff.get('Startup Cost') and diff['Startup Cost'][0] != diff['Startup Cost'][1]):
                 startupCost = f"It cost {diff['Startup Cost'][0]} to start up in the old query and has evolved to cost {diff['Startup Cost'][1]} in the new query. "
-            if (diff['Total Cost'][0] != diff['Total Cost'][1]):
+                friendlyText.append(startupCost)
+            if (diff.get('Total Cost') and diff['Total Cost'][0] != diff['Total Cost'][1]):
                 totalCost = f"It cost a total of {diff['Total Cost'][0]} in the old query and has evolved to cost {diff['Total Cost'][1]} in the new query. "
+                friendlyText.append(totalCost)
             diff = pretty_print_json(json.dumps(diff, indent=4))
-            friendlyText = nodeType + strategyType + startupCost + totalCost + "All these are due to the changes made from the old query to the new query"
             window["text-desc-change"].update(friendlyText)
             # diff = ""
 
