@@ -1,45 +1,35 @@
 import PySimpleGUI as sg
 from explain import *
 import psycopg2
-import json 
+import json
+from visualGraph import *
 
 def run_sql_query_compare():
     conn = psycopg2.connect(
     host="localhost",
     database="TPC-H",
     user="postgres",
-    password="postgres"
+    password="admin"
 )
     
     left_col = [
-        [sg.Text("Old Query")],[sg.Multiline(key='query-input1', size=(50, 5))]
+        [sg.Text("Old Query")],[sg.Multiline(key='query-input1', size=(100, 10))],
+        [sg.Text("Old Query Text Description")],
+        [sg.Multiline(key='text-desc1', size=(100,10),disabled=True)]
     ]
 
     right_col = [
-        [sg.Text("New Query")],[sg.Multiline(key='query-input2', size=(50, 5))]
+        [sg.Text("New Query")],[sg.Multiline(key='query-input2', size=(100, 10))],
+        [sg.Text("New Query Text Description")],
+        [sg.Multiline(key='text-desc2', size=(100,10),disabled=True)]
     ]
 
     canvasSize = 355
 
-    left_col2 = [
-        [sg.Text("Old Query Visual Description")],
-        [sg.Graph(canvas_size=(canvasSize, canvasSize), graph_bottom_left=(0, 0), graph_top_right=(canvasSize, canvasSize), background_color='white', key='canvas1')],
-        [sg.Text("Old Query Text Description")],
-        [sg.Multiline(key='text-desc1', size=(50, 5),disabled=True)]
-    ]
-
-    right_col2 = [
-        [sg.Text("New Query Visual Description")],
-        [sg.Graph(canvas_size=(canvasSize, canvasSize), graph_bottom_left=(0, 0), graph_top_right=(canvasSize, canvasSize), background_color='white', key='canvas2')],
-        [sg.Text("New Query Text Description")],
-        [sg.Multiline(key='text-desc2', size=(50, 5),disabled=True)]
-    ]
-
     layout = [[sg.Column(left_col), sg.Column(right_col)],
-            [sg.Button("Compare Queries", pad=((330, 330), 10) , key='compare-button')],
+            [sg.Button("Compare Queries", pad=((700, 700), 10) , key='compare-button')],
             [sg.Text("Description of Change")],
-            [sg.Multiline(key='text-desc-change', size=(107, 5), disabled=True)],
-            [sg.Column(left_col2), sg.Column(right_col2)]
+            [sg.Multiline(key='text-desc-change', size=(214, 10), disabled=True)]
     ]
 
     # Create the window and set its title
@@ -107,9 +97,14 @@ def run_sql_query_compare():
                 diff = "Queries are identical."
                 window["text-desc-change"].update(diff)
 
+
+            # Draw the query plans
+            draw_queries(q1, q2)
+
     # Close the window when the loop ends
     window.close()
     conn.close()
+    
     
 def pretty_print_json(json_str):
     obj = json.loads(json_str)
