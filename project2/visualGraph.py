@@ -87,17 +87,18 @@ def draw_queries(query1, query2):
 
     # print(plan1)
     # print(plan2)
-
-    array1 =  draw_plan(canvas1, plan1)
-    array2  = draw_plan(canvas2, plan2)
+    initialCountx = 4
+    initialCounty = 0
+    array1 =  draw_plan(canvas1, plan1, initialCountx, initialCounty)
+    array2  = draw_plan(canvas2, plan2, initialCountx, initialCounty)
 
     ALL_RECTANGLES_CANVAS1 = (array1)
     ALL_RECTANGLES_CANVAS2 = (array2)
 
     print(ALL_RECTANGLES_CANVAS1)
 
-    draw_arrows(canvas1,ALL_RECTANGLES_CANVAS1)
-    draw_arrows(canvas2,ALL_RECTANGLES_CANVAS2)
+    # draw_arrows(canvas1,ALL_RECTANGLES_CANVAS1)
+    # draw_arrows(canvas2,ALL_RECTANGLES_CANVAS2)
 
     # root.mainloop()
 
@@ -142,24 +143,23 @@ def rect_top_center(x1, y1, x2, y2):
 def rect_bottom_center(x1, y1, x2, y2):
     return (x1 + x2) / 2, y2
 
-def draw_plan(canvas,plan,countx=4,county=0):
+def draw_plan(canvas,plan,countx,county):
     countx =countx
     county = county
     temparray = []
+    print(plan)
     while plan:
         node = plan.pop(0)
-        print(node)
         if type(node) is list:
-            if "Join" in node[0]:
+            if "Join" in node[0] or "Nested Loop" in node[0]:
                 coords = draw_rectangle(canvas, node[0],countx, county)
                 county+=1
                 left = node[1]
                 right = node[2]
-                leftArray = draw_plan(canvas,left,countx-1,county)
-                rightArray = draw_plan(canvas,right,countx+1,county)
+                leftArray = draw_plan(canvas,[left],countx-1,county)
+                rightArray = draw_plan(canvas,[right],countx+1,county)
 
                 temparray.append([coords,leftArray,rightArray])
-
             else:
                 for subnode in node:
                     plan.append(subnode)
