@@ -1,7 +1,7 @@
 import tkinter as tk
 from explain import *
 
-FIXED_VERTICAL = 75
+FIXED_VERTICAL = 60
 FIXED_HORIZONTAL = 100
 RECT_WIDTH = 100
 RECT_HEIGHT = 50
@@ -97,45 +97,83 @@ def draw_queries(query1, query2):
 
     print(ALL_RECTANGLES_CANVAS1)
 
-    # draw_arrows(canvas1,ALL_RECTANGLES_CANVAS1)
-    # draw_arrows(canvas2,ALL_RECTANGLES_CANVAS2)
+    draw_arrows(canvas1,ALL_RECTANGLES_CANVAS1)
+    draw_arrows(canvas2,ALL_RECTANGLES_CANVAS2)
 
     # root.mainloop()
 
+def draw_arrows_join(canvas, rect1,rect2,rect3):
+
+    rect1bottomCenter = rect_bottom_center(rect1[0],rect1[1],rect1[2],rect1[3])
+    rect2topCenter = rect_top_center(rect2[0],rect2[1],rect2[2],rect2[3])
+    rect3topCenter = rect_top_center(rect3[0],rect3[1],rect3[2],rect3[3])
+
+    canvas.create_line(rect1bottomCenter[0],rect1bottomCenter[1],rect2topCenter[0],rect2topCenter[1])
+    canvas.create_line(rect1bottomCenter[0],rect1bottomCenter[1],rect3topCenter[0],rect3topCenter[1])
+
+def draw_arrows_straight(canvas,rect1,rect2):
+    rect1bottomCenter = rect_bottom_center(rect1[0],rect1[1],rect1[2],rect1[3])
+    rect2topCenter = rect_top_center(rect2[0],rect2[1],rect2[2],rect2[3])                  
+
+    canvas.create_line(rect1bottomCenter[0],rect1bottomCenter[1],rect2topCenter[0],rect2topCenter[1])
+
 def draw_arrows(canvas, array):
-    firstRectIndex = 0
-    secondRectIndex = 1
 
-    while secondRectIndex < len(array):
-        rect1 = array[firstRectIndex]
-        # print("stpt",rect1)
-        startpt = rect_bottom_center(rect1[0],rect1[1],rect1[2],rect1[3])
+    if(type(array) is dict):
+        rect1 = array["head"]
 
-        rect2 = array[secondRectIndex]
-        # print("endpt",rect2)
-        if type(rect2) is list:
-            rect2 = array[secondRectIndex][0]
-            endpt = rect_top_center(rect2[0],rect2[1],rect2[2],rect2[3])
-            canvas.create_line(startpt[0],startpt[1],endpt[0],endpt[1])
+        rect2 = array["left"][0]
+        if(type(rect2) is dict):
+            draw_arrows_straight(canvas,rect1,rect2['head'])
+            draw_arrows(canvas,array["left"][0])
+        else:
+            draw_arrows_straight(canvas,rect1,rect2)
+            draw_arrows(canvas,array["left"])
 
-            rect1 = array[secondRectIndex][0]
-            startpt = rect_bottom_center(rect1[0],rect1[1],rect1[2],rect1[3])
+        rect2 = array["right"][0]
+        if(type(rect2) is dict):
+            draw_arrows_straight(canvas,rect1,rect2['head'])
+            draw_arrows(canvas,array["right"][0])
+        else:
+            draw_arrows_straight(canvas,rect1,rect2)
+            draw_arrows(canvas,array["right"])
+    
+    else:
+        rect1 = array.pop(0)
+        print("rect1", rect1)
+        while array:
+            rect2 = array.pop(0)
+            print("rect2", rect2)
+            if type(rect2) is dict:
+                join = rect2
+                rect2 = join["head"]
+                draw_arrows_straight(canvas,rect1,rect2)
 
-            rect2 = array[secondRectIndex][1][0]
-            endpt = rect_top_center(rect2[0],rect2[1],rect2[2],rect2[3])
-            canvas.create_line(startpt[0],startpt[1],endpt[0],endpt[1])
+                rect1 = join["head"]
+                print("rect2", rect2)
+                if(type(join["left"][0]) is dict):
+                    rect2 = join["left"][0]["head"]
+                    draw_arrows_straight(canvas,rect1,rect2)
+                    draw_arrows(canvas,join["left"][0])
+                else:
+                    draw_arrows_straight(canvas,rect1,join["left"][0])
+                    draw_arrows(canvas,join["left"])
 
-            rect2 = array[secondRectIndex][2][0]
-            endpt = rect_top_center(rect2[0],rect2[1],rect2[2],rect2[3])
-            canvas.create_line(startpt[0],startpt[1],endpt[0],endpt[1])
-        
-            draw_arrows(canvas, array[secondRectIndex][1])
-            draw_arrows(canvas, array[secondRectIndex][2])
-        elif type(rect2) is tuple:
-            endpt = rect_top_center(rect2[0],rect2[1],rect2[2],rect2[3])
-            canvas.create_line(startpt[0],startpt[1],endpt[0],endpt[1])
-        firstRectIndex+=1
-        secondRectIndex+=1
+                if(type(join["right"][0]) is dict):
+                    rect2 = join["right"][0]["head"]
+                    draw_arrows_straight(canvas,rect1,rect2)
+                    draw_arrows(canvas,join["right"][0])
+                else:
+                    draw_arrows_straight(canvas,rect1,join["right"][0])
+                    draw_arrows(canvas,join["right"])
+
+                print("joinLeft",join["left"])
+                print("joinRight",join["right"])
+                
+            else:
+                draw_arrows_straight(canvas,rect1,rect2)
+                rect1 = rect2
+
 
 def rect_top_center(x1, y1, x2, y2):
     return (x1 + x2) / 2, y1
@@ -159,7 +197,15 @@ def draw_plan(canvas,plan,countx,county):
                 leftArray = draw_plan(canvas,[left],countx-1,county)
                 rightArray = draw_plan(canvas,[right],countx+1,county)
 
-                temparray.append([coords,leftArray,rightArray])
+                while type(leftArray[0]) is list:
+                    leftArray = leftArray[0]
+                while type(rightArray[0]) is list:
+                    rightArray = rightArray[0]
+                    
+                temparray.append({"head": coords, "left":leftArray, "right":rightArray})
+
+                
+                # temparray.append([{node[0]:coords},{"left":leftArray},{"right":rightArray}])
             else:
                 for subnode in node:
                     plan.append(subnode)
@@ -172,11 +218,16 @@ def draw_plan(canvas,plan,countx,county):
 
             temparray.append(coords1)
             temparray.append(coords2)
+
+            # temparray.append({temp[0]:coords1})
+            # temparray.append({temp[1]:coords2})
         else:
             coords = draw_rectangle(canvas, node,countx, county)
             county+=1
 
             temparray.append(coords)
+
+            # temparray.append({node:coords})
     
     return temparray
 

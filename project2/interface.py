@@ -50,7 +50,7 @@ def run_sql_query_compare():
             
             # Compare the queries and display the differences in the -DIFF- element
             diff = get_query_plan_diff(conn,query1,query2)
-            print(get_query_plan_diff(conn,query1,query2))
+            # print(get_query_plan_diff(conn,query1,query2))
             friendlyText = "All these are due to the changes made from the old query to the new query:"
             if (diff.get('Node Type') and diff['Node Type'][0] != diff['Node Type'][1]):
                 nodeType = f"It uses {diff['Node Type'][0]} in the old query and has evolved to using {diff['Node Type'][1]} in the new query. "
