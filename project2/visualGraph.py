@@ -1,10 +1,10 @@
 import tkinter as tk
 from explain import *
 
-FIXED_VERTICAL = 60
+FIXED_VERTICAL = 40
 FIXED_HORIZONTAL = 100
-RECT_WIDTH = 100
-RECT_HEIGHT = 50
+RECT_WIDTH = 90
+RECT_HEIGHT = 30
 CANVAS_WIDTH = 700
 CANVAS_HEIGHT = 700
 ALL_RECTANGLES_CANVAS1=[]
@@ -237,7 +237,7 @@ def draw_rectangle(canvas, text,countx, county):
 
     if "Scan" in text:
         color = "light green"
-    elif "Join" in text:
+    elif "Join" in text or "Nested Loop" in text:
         color = "light blue"
     else:
         color = "light grey"
